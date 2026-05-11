@@ -1,0 +1,11 @@
+mode: "dev"
+
+server:
+  port: 6304
+
+logger:
+  level: "debug"
+  filename: "./log/eao.log"
+  max_size: 100 # 单文件最大体积，单位 MB
+  max_age: 30 # 历史日志最大保留天数，单位 day
+  max_backups: 5
