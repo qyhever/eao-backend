@@ -82,6 +82,7 @@ if [ $? -eq 0 ]; then
     echo "📤 开始上传文件到服务器..."
     rsync -avz --progress --partial ./eao qyhever:/opt/apps/eao-backend
     rsync -avz --progress --partial ./public qyhever:/opt/apps/eao-backend
+    rsync -avz --progress --partial ./internal/config/app.yml qyhever:/opt/apps/eao-backend
     rsync -avz --progress --partial ./internal/config/prod.yml qyhever:/opt/apps/eao-backend
     echo "✅ 上传完成！"
 else

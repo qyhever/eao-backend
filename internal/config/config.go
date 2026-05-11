@@ -66,7 +66,7 @@ func Init() error {
 	}
 
 	if err := mergeRequiredConfig(loader, env); err != nil {
-		return fmt.Errorf("读取配置文件 %s.yml 失败: %w", env, err)
+		log.Printf("未找到配置文件 %s.yml，跳过: %v", env, err)
 	}
 
 	if merged, err := mergeOptionalConfig(loader, env+".local"); err != nil {
