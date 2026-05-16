@@ -35,6 +35,10 @@ func SetupRouter() *gin.Engine {
 	postService := service.NewPostService(postRepo)
 	postController := controller.NewPostController(postService)
 
+	videoRepo := persistence.NewVideoRepository()
+	videoService := service.NewVideoService(videoRepo)
+	videoController := controller.NewVideoController(videoService)
+
 	v1 := r.Group("/api")
 
 	v1.GET("/meta", metaController.GetMeta)
@@ -51,6 +55,11 @@ func SetupRouter() *gin.Engine {
 		post.POST("", postController.CreatePost)
 		post.PUT("/:id", postController.UpdatePost)
 		post.DELETE("/:id", postController.DeletePost)
+	}
+
+	video := v1.Group("/video")
+	{
+		video.GET("", videoController.GetVideoList)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

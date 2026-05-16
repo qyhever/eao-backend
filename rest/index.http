@@ -32,3 +32,6 @@ Content-Type: application/json
 
 ### DeletePost
 delete http://{{host}}/api/post/{{postId}} HTTP/1.1
+
+### GetVideoList
+get http://{{host}}/api/video HTTP/1.1

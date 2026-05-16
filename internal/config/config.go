@@ -11,9 +11,10 @@ import (
 
 // Config 应用配置结构体
 type Config struct {
-	Mode   string       `mapstructure:"mode"`
-	Server ServerConfig `mapstructure:"server"`
-	Logger LoggerConfig `mapstructure:"logger"`
+	Mode          string       `mapstructure:"mode"`
+	PublicBaseURL string       `mapstructure:"public_base_url"`
+	Server        ServerConfig `mapstructure:"server"`
+	Logger        LoggerConfig `mapstructure:"logger"`
 }
 
 // ServerConfig 服务器配置
@@ -97,6 +98,7 @@ func bindEnvVars(loader *viper.Viper) {
 	loader.AutomaticEnv()
 
 	loader.BindEnv("mode", "EAO_MODE")
+	loader.BindEnv("public_base_url", "EAO_PUBLIC_BASE_URL")
 
 	loader.BindEnv("server.port", "EAO_SERVER_PORT")
 

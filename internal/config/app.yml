@@ -1,4 +1,5 @@
 mode: "dev"
+public_base_url: ""
 
 server:
   port: 6304
