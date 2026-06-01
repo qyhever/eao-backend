@@ -8,7 +8,6 @@ import (
 	"eao/internal/model"
 	"eao/internal/pkg/password"
 	"eao/internal/repository"
-	"eao/internal/repository/mysql"
 )
 
 var (
@@ -54,7 +53,7 @@ func (s *AdminService) CreateAdmin(ctx context.Context, req model.CreateAdminReq
 		Status:       "active",
 	})
 	if err != nil {
-		if errors.Is(err, mysql.ErrAdminUsernameAlreadyExists) {
+		if errors.Is(err, repository.ErrAdminUsernameAlreadyExists) {
 			return nil, ErrAdminUsernameAlreadyExists
 		}
 		return nil, err

@@ -1,4 +1,4 @@
-package mysql
+package persistence
 
 import (
 	"context"
@@ -9,13 +9,13 @@ import (
 	"time"
 
 	"eao/internal/model"
+	"eao/internal/repository"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
 var (
-	ErrAdminUsernameAlreadyExists = errors.New("admin username already exists")
-	adminIDSequence               atomic.Int64
+	adminIDSequence atomic.Int64
 )
 
 type AdminRepository struct {
@@ -26,7 +26,7 @@ type AdminRepository struct {
 	adminIDsByName map[string]int64
 }
 
-func NewAdminRepositoryWithDB(db *sql.DB, admins ...model.Admin) *AdminRepository {
+func NewAdminRepositoryWithDB(db *sql.DB, admins ...model.Admin) repository.AdminRepository {
 	if db != nil {
 		return &AdminRepository{db: db}
 	}
@@ -34,7 +34,7 @@ func NewAdminRepositoryWithDB(db *sql.DB, admins ...model.Admin) *AdminRepositor
 	return newInMemoryAdminRepository(admins...)
 }
 
-func NewAdminRepository(admins ...model.Admin) *AdminRepository {
+func NewAdminRepository(admins ...model.Admin) repository.AdminRepository {
 	return newInMemoryAdminRepository(admins...)
 }
 
@@ -160,7 +160,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)`,
 			admin.UpdatedAt,
 		)
 		if isDuplicateAdminUsernameError(err) {
-			return nil, ErrAdminUsernameAlreadyExists
+			return nil, repository.ErrAdminUsernameAlreadyExists
 		}
 		if err != nil {
 			return nil, err
@@ -172,7 +172,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)`,
 	defer r.mu.Unlock()
 
 	if _, exists := r.adminIDsByName[admin.Username]; exists {
-		return nil, ErrAdminUsernameAlreadyExists
+		return nil, repository.ErrAdminUsernameAlreadyExists
 	}
 	if admin.Status == "" {
 		admin.Status = "active"

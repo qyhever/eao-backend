@@ -12,8 +12,9 @@ import (
 	"eao/internal/controller"
 	"eao/internal/middleware"
 	"eao/internal/model"
+	dbpkg "eao/internal/pkg/db"
 	"eao/internal/pkg/password"
-	"eao/internal/repository/mysql"
+	"eao/internal/repository"
 	"eao/internal/repository/persistence"
 	"eao/internal/service"
 
@@ -34,7 +35,10 @@ func SetupRouter() *gin.Engine {
 	fmt.Printf("Go Version %v\n", runtime.Version())
 
 	cfg := config.GetConfig()
-	db := initMySQLDB(cfg)
+	db, err := dbpkg.OpenMySQLFromConfig(cfg)
+	if err != nil {
+		panic(fmt.Errorf("初始化 MySQL 失败: %w", err))
+	}
 	// adminRepo := newAdminRepositoryFromConfig(cfg, db)
 	newAdminRepositoryFromConfig(cfg, db)
 
@@ -85,31 +89,12 @@ func SetupRouter() *gin.Engine {
 	return r
 }
 
-func initMySQLDB(cfg *config.Config) *sql.DB {
-	if cfg == nil {
-		return nil
-	}
-
-	dsn := config.BuildMySQLDSN(cfg)
-	if strings.TrimSpace(dsn) == "" {
-		return nil
-	}
-
-	db, err := mysql.OpenDB(dsn)
-	if err != nil {
-		panic(fmt.Errorf("初始化 MySQL 失败: %w", err))
-	}
-
-	mysql.SetDB(db)
-	return db
-}
-
-func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) *mysql.AdminRepository {
+func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.AdminRepository {
 	admin, err := buildAdminSeed(cfg)
 	if err != nil {
 		panic(fmt.Errorf("初始化管理员 seed 失败: %w", err))
 	}
-	repo := mysql.NewAdminRepositoryWithDB(db)
+	repo := persistence.NewAdminRepositoryWithDB(db)
 	if admin == nil {
 		return repo
 	}
@@ -121,7 +106,7 @@ func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) *mysql.AdminRe
 		return repo
 	}
 
-	return mysql.NewAdminRepository(*admin)
+	return persistence.NewAdminRepository(*admin)
 }
 
 func buildAdminSeed(cfg *config.Config) (*model.Admin, error) {
