@@ -5,16 +5,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 )
 
 // Config 应用配置结构体
 type Config struct {
-	Mode          string       `mapstructure:"mode"`
-	PublicBaseURL string       `mapstructure:"public_base_url"`
-	Server        ServerConfig `mapstructure:"server"`
-	Logger        LoggerConfig `mapstructure:"logger"`
+	Mode          string         `mapstructure:"mode"`
+	PublicBaseURL string         `mapstructure:"public_base_url"`
+	Server        ServerConfig   `mapstructure:"server"`
+	Logger        LoggerConfig   `mapstructure:"logger"`
+	Database      DatabaseConfig `mapstructure:"database"`
+	JWT           JWTConfig      `mapstructure:"jwt"`
+	Auth          AuthConfig     `mapstructure:"auth"`
 }
 
 // ServerConfig 服务器配置
@@ -29,6 +33,39 @@ type LoggerConfig struct {
 	MaxSize    int    `mapstructure:"max_size"`
 	MaxAge     int    `mapstructure:"max_age"`
 	MaxBackups int    `mapstructure:"max_backups"`
+}
+
+// DatabaseConfig 数据库配置
+type DatabaseConfig struct {
+	MySQL MySQLConfig `mapstructure:"mysql"`
+}
+
+// MySQLConfig MySQL数据库配置
+type MySQLConfig struct {
+	Addr     string `mapstructure:"addr"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	DBName   string `mapstructure:"db_name"`
+}
+
+// JWTConfig JWT配置
+type JWTConfig struct {
+	Secret           string `mapstructure:"secret"`
+	AccessExpiresIn  string `mapstructure:"access_expires_in"`
+	RefreshExpiresIn string `mapstructure:"refresh_expires_in"`
+}
+
+// AuthConfig 认证相关配置
+// 包括访问白名单（支持 "METHOD:/path" 或仅路径形式）。
+type AuthConfig struct {
+	Whitelist []string        `mapstructure:"whitelist"`
+	Admin     AdminSeedConfig `mapstructure:"admin"`
+}
+
+type AdminSeedConfig struct {
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Name     string `mapstructure:"name"`
 }
 
 // GlobalConfig 全局配置实例
@@ -107,6 +144,19 @@ func bindEnvVars(loader *viper.Viper) {
 	loader.BindEnv("logger.max_size", "EAO_LOGGER_MAX_SIZE")
 	loader.BindEnv("logger.max_age", "EAO_LOGGER_MAX_AGE")
 	loader.BindEnv("logger.max_backups", "EAO_LOGGER_MAX_BACKUPS")
+
+	loader.BindEnv("database.mysql.addr", "EAO_DATABASE_MYSQL_ADDR")
+	loader.BindEnv("database.mysql.user", "EAO_DATABASE_MYSQL_USER")
+	loader.BindEnv("database.mysql.password", "EAO_DATABASE_MYSQL_PASSWORD")
+	loader.BindEnv("database.mysql.db_name", "EAO_DATABASE_MYSQL_DB_NAME")
+
+	viper.BindEnv("jwt.secret", "EAO_JWT_SECRET")
+	viper.BindEnv("jwt.access_expires_in", "EAO_JWT_ACCESS_EXPIRES_IN")
+	viper.BindEnv("jwt.refresh_expires_in", "EAO_JWT_REFRESH_EXPIRES_IN")
+
+	loader.BindEnv("auth.admin.username", "EAO_AUTH_ADMIN_USERNAME")
+	loader.BindEnv("auth.admin.password", "EAO_AUTH_ADMIN_PASSWORD")
+	loader.BindEnv("auth.admin.name", "EAO_AUTH_ADMIN_NAME")
 }
 
 func readRequiredConfig(loader *viper.Viper, name string) error {
@@ -146,6 +196,30 @@ func GetServerAddr() string {
 	return fmt.Sprintf(":%d", GlobalConfig.Server.Port)
 }
 
+// GetMySQLDSN 获取MySQL连接字符串
+func GetMySQLDSN() string {
+	if GlobalConfig == nil {
+		return ""
+	}
+	return BuildMySQLDSN(GlobalConfig)
+}
+
+// BuildMySQLDSN 从指定配置生成 MySQL 连接字符串
+func BuildMySQLDSN(cfg *Config) string {
+	if cfg == nil {
+		return ""
+	}
+
+	mysql := cfg.Database.MySQL
+	if strings.TrimSpace(mysql.Addr) == "" ||
+		strings.TrimSpace(mysql.User) == "" ||
+		strings.TrimSpace(mysql.DBName) == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		mysql.User, mysql.Password, mysql.Addr, mysql.DBName)
+}
+
 // GetEnv 获取当前环境（dev/test/prod）
 func GetEnv() string {
 	env := os.Getenv("EAO_ENV")
@@ -168,4 +242,10 @@ func IsDevelopment() bool {
 // IsTest 判断是否为测试环境
 func IsTest() bool {
 	return GetEnv() == "test"
+}
+
+func (c *AdminSeedConfig) normalize() {
+	c.Username = strings.TrimSpace(c.Username)
+	c.Password = strings.TrimSpace(c.Password)
+	c.Name = strings.TrimSpace(c.Name)
 }

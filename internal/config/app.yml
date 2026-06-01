@@ -10,3 +10,26 @@ logger:
   max_size: 100 # 单文件最大体积，单位 MB
   max_age: 30 # 历史日志最大保留天数，单位 day
   max_backups: 5
+
+database:
+  mysql:
+    addr: "localhost:3306"
+    user: "root"
+    password: "123456"
+    db_name: "eao"
+
+jwt:
+  secret: "foobar"
+  access_expires_in: "2h"
+  refresh_expires_in: "72h"
+
+auth:
+  whitelist:
+    - "GET:/foo"
+    - "GET:/@vite/client"
+    - "GET:/"
+    - "POST:/app/getHelloInfo"
+  admin:
+    username: "admin"
+    password: "admin123"
+    name: "管理员"
