@@ -26,32 +26,8 @@ type AdminRepository struct {
 	adminIDsByName map[string]int64
 }
 
-func NewAdminRepositoryWithDB(db *sql.DB, admins ...model.Admin) repository.AdminRepository {
-	if db != nil {
-		return &AdminRepository{db: db}
-	}
-
-	return newInMemoryAdminRepository(admins...)
-}
-
-func NewAdminRepository(admins ...model.Admin) repository.AdminRepository {
-	return newInMemoryAdminRepository(admins...)
-}
-
-func newInMemoryAdminRepository(admins ...model.Admin) *AdminRepository {
-	repo := &AdminRepository{
-		nextID:         1,
-		adminsByID:     make(map[int64]model.Admin),
-		adminIDsByName: make(map[string]int64),
-	}
-	for _, admin := range admins {
-		repo.adminsByID[admin.ID] = admin
-		repo.adminIDsByName[admin.Username] = admin.ID
-		if admin.ID >= repo.nextID {
-			repo.nextID = admin.ID + 1
-		}
-	}
-	return repo
+func NewAdminRepository(db *sql.DB) repository.AdminRepository {
+	return &AdminRepository{db: db}
 }
 
 func (r *AdminRepository) FindByUsername(ctx context.Context, username string) (*model.Admin, error) {

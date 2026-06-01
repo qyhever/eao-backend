@@ -94,7 +94,7 @@ func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.Adm
 	if err != nil {
 		panic(fmt.Errorf("初始化管理员 seed 失败: %w", err))
 	}
-	repo := persistence.NewAdminRepositoryWithDB(db)
+	repo := persistence.NewAdminRepository(db)
 	if admin == nil {
 		return repo
 	}
@@ -106,7 +106,7 @@ func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.Adm
 		return repo
 	}
 
-	return persistence.NewAdminRepository(*admin)
+	return repo
 }
 
 func buildAdminSeed(cfg *config.Config) (*model.Admin, error) {
