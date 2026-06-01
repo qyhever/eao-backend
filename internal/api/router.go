@@ -1,12 +1,19 @@
 package router
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"runtime"
+	"strings"
 
 	"eao/internal/config"
 	"eao/internal/controller"
+	"eao/internal/middleware"
+	"eao/internal/model"
+	"eao/internal/pkg/password"
+	"eao/internal/repository/mysql"
 	"eao/internal/repository/persistence"
 	"eao/internal/service"
 
@@ -25,6 +32,11 @@ func SetupRouter() *gin.Engine {
 	r.Static("/public", "./public")
 
 	fmt.Printf("Go Version %v\n", runtime.Version())
+
+	cfg := config.GetConfig()
+	db := initMySQLDB(cfg)
+	// adminRepo := newAdminRepositoryFromConfig(cfg, db)
+	newAdminRepositoryFromConfig(cfg, db)
 
 	metaController := controller.NewMetaController()
 	appRepo := persistence.NewAppRepository()
@@ -62,10 +74,81 @@ func SetupRouter() *gin.Engine {
 		video.GET("", videoController.GetVideoList)
 	}
 
+	// 下面的api是需要登录的
+	v1.Use(middleware.JWTAuthMiddleware())
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"msg": "404",
 		})
 	})
 	return r
+}
+
+func initMySQLDB(cfg *config.Config) *sql.DB {
+	if cfg == nil {
+		return nil
+	}
+
+	dsn := config.BuildMySQLDSN(cfg)
+	if strings.TrimSpace(dsn) == "" {
+		return nil
+	}
+
+	db, err := mysql.OpenDB(dsn)
+	if err != nil {
+		panic(fmt.Errorf("初始化 MySQL 失败: %w", err))
+	}
+
+	mysql.SetDB(db)
+	return db
+}
+
+func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) *mysql.AdminRepository {
+	admin, err := buildAdminSeed(cfg)
+	if err != nil {
+		panic(fmt.Errorf("初始化管理员 seed 失败: %w", err))
+	}
+	repo := mysql.NewAdminRepositoryWithDB(db)
+	if admin == nil {
+		return repo
+	}
+
+	if db != nil {
+		if err := repo.Upsert(context.Background(), *admin); err != nil {
+			panic(fmt.Errorf("写入管理员 seed 失败: %w", err))
+		}
+		return repo
+	}
+
+	return mysql.NewAdminRepository(*admin)
+}
+
+func buildAdminSeed(cfg *config.Config) (*model.Admin, error) {
+	if cfg == nil {
+		return nil, nil
+	}
+
+	adminCfg := cfg.Auth.Admin
+	if strings.TrimSpace(adminCfg.Username) == "" || strings.TrimSpace(adminCfg.Password) == "" {
+		return nil, nil
+	}
+
+	hash, err := password.Hash(adminCfg.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	name := adminCfg.Name
+	if strings.TrimSpace(name) == "" {
+		name = adminCfg.Username
+	}
+
+	return &model.Admin{
+		ID:           1,
+		Username:     adminCfg.Username,
+		PasswordHash: hash,
+		Name:         name,
+		Status:       "active",
+	}, nil
 }
