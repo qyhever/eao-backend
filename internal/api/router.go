@@ -55,6 +55,10 @@ func SetupRouter() *gin.Engine {
 	videoService := service.NewVideoService(videoRepo)
 	videoController := controller.NewVideoController(videoService)
 
+	fileRepo := persistence.NewFileRepository(cfg.ThirdParty.FileAPI)
+	fileService := service.NewFileService(fileRepo)
+	fileController := controller.NewFileController(fileService)
+
 	v1 := r.Group("/api")
 
 	v1.GET("/meta", metaController.GetMeta)
@@ -76,6 +80,13 @@ func SetupRouter() *gin.Engine {
 	video := v1.Group("/video")
 	{
 		video.GET("", videoController.GetVideoList)
+	}
+
+	file := v1.Group("/file")
+	{
+		file.GET("/list", fileController.List)
+		file.GET("/listByDir", fileController.ListByDir)
+		file.POST("/upload", fileController.Upload)
 	}
 
 	// 下面的api是需要登录的

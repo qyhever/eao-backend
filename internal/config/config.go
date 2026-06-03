@@ -12,13 +12,14 @@ import (
 
 // Config 应用配置结构体
 type Config struct {
-	Mode          string         `mapstructure:"mode"`
-	PublicBaseURL string         `mapstructure:"public_base_url"`
-	Server        ServerConfig   `mapstructure:"server"`
-	Logger        LoggerConfig   `mapstructure:"logger"`
-	Database      DatabaseConfig `mapstructure:"database"`
-	JWT           JWTConfig      `mapstructure:"jwt"`
-	Auth          AuthConfig     `mapstructure:"auth"`
+	Mode          string           `mapstructure:"mode"`
+	PublicBaseURL string           `mapstructure:"public_base_url"`
+	Server        ServerConfig     `mapstructure:"server"`
+	Logger        LoggerConfig     `mapstructure:"logger"`
+	Database      DatabaseConfig   `mapstructure:"database"`
+	JWT           JWTConfig        `mapstructure:"jwt"`
+	Auth          AuthConfig       `mapstructure:"auth"`
+	ThirdParty    ThirdPartyConfig `mapstructure:"third_party"`
 }
 
 // ServerConfig 服务器配置
@@ -60,6 +61,16 @@ type JWTConfig struct {
 type AuthConfig struct {
 	Whitelist []string        `mapstructure:"whitelist"`
 	Admin     AdminSeedConfig `mapstructure:"admin"`
+}
+
+type ThirdPartyConfig struct {
+	FileAPI FileAPIConfig `mapstructure:"file_api"`
+}
+
+type FileAPIConfig struct {
+	BaseURL        string `mapstructure:"base_url"`
+	Secret         string `mapstructure:"secret"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds"`
 }
 
 type AdminSeedConfig struct {
@@ -118,6 +129,9 @@ func Init() error {
 	if err := loader.Unmarshal(GlobalConfig); err != nil {
 		return fmt.Errorf("解析配置文件失败: %w", err)
 	}
+	if err := GlobalConfig.normalizeAndValidate(); err != nil {
+		return err
+	}
 
 	log.Printf("当前环境: %s", env)
 	log.Printf("配置文件加载成功: app.yml -> %s.yml", env)
@@ -157,6 +171,10 @@ func bindEnvVars(loader *viper.Viper) {
 	loader.BindEnv("auth.admin.username", "EAO_AUTH_ADMIN_USERNAME")
 	loader.BindEnv("auth.admin.password", "EAO_AUTH_ADMIN_PASSWORD")
 	loader.BindEnv("auth.admin.name", "EAO_AUTH_ADMIN_NAME")
+
+	loader.BindEnv("third_party.file_api.base_url", "EAO_THIRD_PARTY_FILE_API_BASE_URL")
+	loader.BindEnv("third_party.file_api.secret", "EAO_THIRD_PARTY_FILE_API_SECRET")
+	loader.BindEnv("third_party.file_api.timeout_seconds", "EAO_THIRD_PARTY_FILE_API_TIMEOUT_SECONDS")
 }
 
 func readRequiredConfig(loader *viper.Viper, name string) error {
@@ -242,6 +260,26 @@ func IsDevelopment() bool {
 // IsTest 判断是否为测试环境
 func IsTest() bool {
 	return GetEnv() == "test"
+}
+
+func (c *Config) normalizeAndValidate() error {
+	if c == nil {
+		return nil
+	}
+
+	c.ThirdParty.FileAPI.BaseURL = strings.TrimSpace(c.ThirdParty.FileAPI.BaseURL)
+	c.ThirdParty.FileAPI.Secret = strings.TrimSpace(c.ThirdParty.FileAPI.Secret)
+	if c.ThirdParty.FileAPI.TimeoutSeconds <= 0 {
+		c.ThirdParty.FileAPI.TimeoutSeconds = 10
+	}
+	if c.ThirdParty.FileAPI.BaseURL == "" {
+		return fmt.Errorf("third_party.file_api.base_url 不能为空")
+	}
+	if c.ThirdParty.FileAPI.Secret == "" {
+		return fmt.Errorf("third_party.file_api.secret 不能为空")
+	}
+
+	return nil
 }
 
 func (c *AdminSeedConfig) normalize() {

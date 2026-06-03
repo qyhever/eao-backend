@@ -33,3 +33,9 @@ auth:
     username: "admin"
     password: "admin123"
     name: "管理员"
+
+third_party:
+  file_api:
+    base_url: "http://localhost:6301"
+    secret: "test-secret"
+    timeout_seconds: 10
