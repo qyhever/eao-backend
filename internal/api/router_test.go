@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"eao/internal/config"
+	jwtpkg "eao/internal/pkg/jwt"
 )
 
 type responseEnvelope struct {
@@ -143,12 +144,87 @@ func TestSetupRouterFileUploadMissingDirName(t *testing.T) {
 	}
 }
 
+func TestSetupRouterAdminRequiresToken(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/1", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, resp.Code)
+	}
+}
+
+func TestSetupRouterAdminInvalidID(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	token := testAccessToken(t)
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/bad", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code int `json:"code"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1001 {
+		t.Fatalf("expected code 1001, got %d", body.Code)
+	}
+}
+
+func TestSetupRouterAdminSuccessEnvelope(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	token := testAccessToken(t)
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/1", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code int `json:"code"`
+		Data struct {
+			ID       int64  `json:"id"`
+			Username string `json:"username"`
+			Status   string `json:"status"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1000 {
+		t.Fatalf("expected code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.ID != 1 || body.Data.Username != "admin" || body.Data.Status != "active" {
+		t.Fatalf("unexpected admin data: %+v", body.Data)
+	}
+}
+
 func testRouterConfig(fileAPIBaseURL string) *config.Config {
 	if fileAPIBaseURL == "" {
 		fileAPIBaseURL = "http://localhost:6301"
 	}
 	return &config.Config{
 		PublicBaseURL: "https://www.painorth.bbroot.com/videos/",
+		JWT: config.JWTConfig{
+			Secret:           "test-secret",
+			AccessExpiresIn:  "1h",
+			RefreshExpiresIn: "24h",
+		},
+		Auth: config.AuthConfig{
+			Admin: config.AdminSeedConfig{
+				Username: "admin",
+				Password: "password",
+				Name:     "管理员",
+			},
+		},
 		ThirdParty: config.ThirdPartyConfig{
 			FileAPI: config.FileAPIConfig{
 				BaseURL:        fileAPIBaseURL,
@@ -157,4 +233,13 @@ func testRouterConfig(fileAPIBaseURL string) *config.Config {
 			},
 		},
 	}
+}
+
+func testAccessToken(t *testing.T) string {
+	t.Helper()
+	token, _, err := jwtpkg.GenToken(1, false)
+	if err != nil {
+		t.Fatalf("generate token failed: %v", err)
+	}
+	return token
 }

@@ -39,8 +39,9 @@ func SetupRouter() *gin.Engine {
 	if err != nil {
 		panic(fmt.Errorf("初始化 MySQL 失败: %w", err))
 	}
-	// adminRepo := newAdminRepositoryFromConfig(cfg, db)
-	newAdminRepositoryFromConfig(cfg, db)
+	adminRepo := newAdminRepositoryFromConfig(cfg, db)
+	adminService := service.NewAdminService(adminRepo)
+	adminController := controller.NewAdminController(adminService)
 
 	metaController := controller.NewMetaController()
 	appRepo := persistence.NewAppRepository()
@@ -92,6 +93,14 @@ func SetupRouter() *gin.Engine {
 	// 下面的api是需要登录的
 	v1.Use(middleware.JWTAuthMiddleware())
 
+	admin := v1.Group("/admin")
+	{
+		admin.GET("/:id", adminController.GetAdmin)
+		admin.PUT("/:id", adminController.UpdateAdmin)
+		admin.DELETE("/batch", adminController.BatchDeleteAdmins)
+		admin.PUT("/:id/status", adminController.ToggleAdminStatus)
+	}
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"msg": "404",
@@ -110,11 +119,8 @@ func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.Adm
 		return repo
 	}
 
-	if db != nil {
-		if err := repo.Upsert(context.Background(), *admin); err != nil {
-			panic(fmt.Errorf("写入管理员 seed 失败: %w", err))
-		}
-		return repo
+	if err := repo.Upsert(context.Background(), *admin); err != nil {
+		panic(fmt.Errorf("写入管理员 seed 失败: %w", err))
 	}
 
 	return repo

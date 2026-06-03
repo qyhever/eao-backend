@@ -1,6 +1,7 @@
 @hostname = localhost
 @port = 6304
 @host = {{hostname}}:{{port}}
+@token = replace-with-access-token
 
 ### GetPostList
 get http://{{host}}/api/post?pageNum=1&pageSize=10&keyword=测试 HTTP/1.1
@@ -35,3 +36,37 @@ delete http://{{host}}/api/post/{{postId}} HTTP/1.1
 
 ### GetVideoList
 get http://{{host}}/api/video HTTP/1.1
+
+### GetAdmin
+@adminId = 1
+get http://{{host}}/api/admin/{{adminId}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+### UpdateAdmin
+put http://{{host}}/api/admin/{{adminId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "admin",
+  "name": "管理员",
+  "password": "new-password"
+}
+
+### BatchDeleteAdmins
+delete http://{{host}}/api/admin/batch HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ids": [1, 2, 3]
+}
+
+### ToggleAdminStatus
+put http://{{host}}/api/admin/{{adminId}}/status HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "active"
+}
