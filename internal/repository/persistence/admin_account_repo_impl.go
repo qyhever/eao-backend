@@ -20,7 +20,7 @@ var (
 	adminIDSequence atomic.Int64
 )
 
-type AdminRepository struct {
+type AdminAccountRepository struct {
 	db             *sql.DB
 	mu             sync.RWMutex
 	nextID         int64
@@ -28,8 +28,8 @@ type AdminRepository struct {
 	adminIDsByName map[string]int64
 }
 
-func NewAdminRepository(db *sql.DB) repository.AdminRepository {
-	return &AdminRepository{
+func NewAdminAccountRepository(db *sql.DB) repository.AdminAccountRepository {
+	return &AdminAccountRepository{
 		db:             db,
 		nextID:         1,
 		adminsByID:     make(map[int64]model.Admin),
@@ -37,7 +37,7 @@ func NewAdminRepository(db *sql.DB) repository.AdminRepository {
 	}
 }
 
-func (r *AdminRepository) FindByUsername(ctx context.Context, username string) (*model.Admin, error) {
+func (r *AdminAccountRepository) FindByUsername(ctx context.Context, username string) (*model.Admin, error) {
 	if r.db != nil {
 		return r.findOne(ctx, `SELECT id, username, password_hash, display_name, status, created_at, updated_at, deleted_at
 FROM admins
@@ -59,7 +59,7 @@ WHERE username = ? AND deleted_at IS NULL`, username)
 	return cloneAdmin(admin), nil
 }
 
-func (r *AdminRepository) FindByID(ctx context.Context, id int64) (*model.Admin, error) {
+func (r *AdminAccountRepository) FindByID(ctx context.Context, id int64) (*model.Admin, error) {
 	if r.db != nil {
 		return r.findOne(ctx, `SELECT id, username, password_hash, display_name, status, created_at, updated_at, deleted_at
 FROM admins
@@ -79,7 +79,7 @@ WHERE id = ? AND deleted_at IS NULL`, id)
 	return cloneAdmin(admin), nil
 }
 
-func (r *AdminRepository) Upsert(ctx context.Context, admin model.Admin) error {
+func (r *AdminAccountRepository) Upsert(ctx context.Context, admin model.Admin) error {
 	if r.db != nil {
 		now := time.Now()
 		if admin.Status == "" {
@@ -133,7 +133,7 @@ ON DUPLICATE KEY UPDATE
 	return nil
 }
 
-func (r *AdminRepository) Create(ctx context.Context, admin model.Admin) (*model.Admin, error) {
+func (r *AdminAccountRepository) Create(ctx context.Context, admin model.Admin) (*model.Admin, error) {
 	if r.db != nil {
 		now := time.Now()
 		if admin.Status == "" {
@@ -181,7 +181,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, NULL)`,
 	return cloneAdmin(admin), nil
 }
 
-func (r *AdminRepository) Update(ctx context.Context, admin model.Admin) (*model.Admin, error) {
+func (r *AdminAccountRepository) Update(ctx context.Context, admin model.Admin) (*model.Admin, error) {
 	if r.db != nil {
 		admin.UpdatedAt = time.Now()
 		_, err := r.db.ExecContext(ctx, `UPDATE admins
@@ -224,7 +224,7 @@ WHERE id = ? AND deleted_at IS NULL`,
 	return cloneAdmin(admin), nil
 }
 
-func (r *AdminRepository) BatchSoftDelete(ctx context.Context, ids []int64) error {
+func (r *AdminAccountRepository) BatchSoftDelete(ctx context.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -256,7 +256,7 @@ WHERE id IN (%s) AND deleted_at IS NULL`, placeholders), args...)
 	return nil
 }
 
-func (r *AdminRepository) UpdateStatus(ctx context.Context, id int64, status string) (*model.Admin, error) {
+func (r *AdminAccountRepository) UpdateStatus(ctx context.Context, id int64, status string) (*model.Admin, error) {
 	if r.db != nil {
 		_, err := r.db.ExecContext(ctx, `UPDATE admins
 SET status = ?, updated_at = NOW()
@@ -280,7 +280,7 @@ WHERE id = ? AND deleted_at IS NULL`, status, id)
 	return cloneAdmin(admin), nil
 }
 
-func (r *AdminRepository) findOne(ctx context.Context, query string, arg any) (*model.Admin, error) {
+func (r *AdminAccountRepository) findOne(ctx context.Context, query string, arg any) (*model.Admin, error) {
 	var admin model.Admin
 	var deletedAt sql.NullTime
 	err := r.db.QueryRowContext(ctx, query, arg).Scan(

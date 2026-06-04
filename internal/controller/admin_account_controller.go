@@ -11,17 +11,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type AdminController struct {
-	adminService *service.AdminService
+type AdminAccountController struct {
+	adminService *service.AdminAccountService
 }
 
-func NewAdminController(adminService *service.AdminService) *AdminController {
-	return &AdminController{
+func NewAdminAccountController(adminService *service.AdminAccountService) *AdminAccountController {
+	return &AdminAccountController{
 		adminService: adminService,
 	}
 }
 
-func (ac *AdminController) GetAdmin(c *gin.Context) {
+func (ac *AdminAccountController) GetAdmin(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {
 		return
@@ -36,7 +36,7 @@ func (ac *AdminController) GetAdmin(c *gin.Context) {
 	ResponseSuccess(c, admin)
 }
 
-func (ac *AdminController) UpdateAdmin(c *gin.Context) {
+func (ac *AdminAccountController) UpdateAdmin(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {
 		return
@@ -57,7 +57,7 @@ func (ac *AdminController) UpdateAdmin(c *gin.Context) {
 	ResponseSuccess(c, &model.AdminMutationResponse{ID: admin.ID})
 }
 
-func (ac *AdminController) BatchDeleteAdmins(c *gin.Context) {
+func (ac *AdminAccountController) BatchDeleteAdmins(c *gin.Context) {
 	var req model.BatchDeleteAdminRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		ResponseFailedWithMsg(c, CodeInvalidParam, "请求参数错误: "+err.Error())
@@ -72,7 +72,7 @@ func (ac *AdminController) BatchDeleteAdmins(c *gin.Context) {
 	ResponseSuccess(c, &model.AdminBatchMutationResponse{IDs: req.IDs})
 }
 
-func (ac *AdminController) ToggleAdminStatus(c *gin.Context) {
+func (ac *AdminAccountController) ToggleAdminStatus(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {
 		return
@@ -102,7 +102,7 @@ func bindAdminID(c *gin.Context) (int64, bool) {
 	return id, true
 }
 
-func (ac *AdminController) writeAdminError(c *gin.Context, logMsg string, err error) {
+func (ac *AdminAccountController) writeAdminError(c *gin.Context, logMsg string, err error) {
 	switch {
 	case errors.Is(err, service.ErrAdminIDInvalid),
 		errors.Is(err, service.ErrAdminUsernameRequired),

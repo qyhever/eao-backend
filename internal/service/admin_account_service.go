@@ -21,17 +21,17 @@ var (
 	ErrAdminStatusInvalid         = errors.New("管理员状态只能是 active 或 disabled")
 )
 
-type AdminService struct {
-	adminRepo repository.AdminRepository
+type AdminAccountService struct {
+	adminRepo repository.AdminAccountRepository
 }
 
-func NewAdminService(adminRepo repository.AdminRepository) *AdminService {
-	return &AdminService{
+func NewAdminAccountService(adminRepo repository.AdminAccountRepository) *AdminAccountService {
+	return &AdminAccountService{
 		adminRepo: adminRepo,
 	}
 }
 
-func (s *AdminService) CreateAdmin(ctx context.Context, req model.CreateAdminRequest) (*model.AdminProfileResponse, error) {
+func (s *AdminAccountService) CreateAdmin(ctx context.Context, req model.CreateAdminRequest) (*model.AdminProfileResponse, error) {
 
 	username := strings.TrimSpace(req.Username)
 	if username == "" {
@@ -72,7 +72,7 @@ func (s *AdminService) CreateAdmin(ctx context.Context, req model.CreateAdminReq
 	}, nil
 }
 
-func (s *AdminService) GetAdmin(ctx context.Context, id int64) (*model.AdminProfileResponse, error) {
+func (s *AdminAccountService) GetAdmin(ctx context.Context, id int64) (*model.AdminProfileResponse, error) {
 	if id <= 0 {
 		return nil, ErrAdminIDInvalid
 	}
@@ -88,7 +88,7 @@ func (s *AdminService) GetAdmin(ctx context.Context, id int64) (*model.AdminProf
 	return adminProfileResponse(admin), nil
 }
 
-func (s *AdminService) UpdateAdmin(ctx context.Context, id int64, req model.UpdateAdminRequest) (*model.AdminProfileResponse, error) {
+func (s *AdminAccountService) UpdateAdmin(ctx context.Context, id int64, req model.UpdateAdminRequest) (*model.AdminProfileResponse, error) {
 	if id <= 0 {
 		return nil, ErrAdminIDInvalid
 	}
@@ -143,7 +143,7 @@ func (s *AdminService) UpdateAdmin(ctx context.Context, id int64, req model.Upda
 	return adminProfileResponse(updated), nil
 }
 
-func (s *AdminService) BatchDeleteAdmins(ctx context.Context, req model.BatchDeleteAdminRequest) error {
+func (s *AdminAccountService) BatchDeleteAdmins(ctx context.Context, req model.BatchDeleteAdminRequest) error {
 	if len(req.IDs) == 0 {
 		return ErrAdminIDsRequired
 	}
@@ -155,7 +155,7 @@ func (s *AdminService) BatchDeleteAdmins(ctx context.Context, req model.BatchDel
 	return s.adminRepo.BatchSoftDelete(ctx, req.IDs)
 }
 
-func (s *AdminService) ToggleAdminStatus(ctx context.Context, id int64, req model.ToggleAdminStatusRequest) (*model.AdminProfileResponse, error) {
+func (s *AdminAccountService) ToggleAdminStatus(ctx context.Context, id int64, req model.ToggleAdminStatusRequest) (*model.AdminProfileResponse, error) {
 	if id <= 0 {
 		return nil, ErrAdminIDInvalid
 	}

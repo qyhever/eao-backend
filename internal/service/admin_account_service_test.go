@@ -17,7 +17,7 @@ func TestAdminServiceGetAdminSkipsSoftDeleted(t *testing.T) {
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
-	svc := NewAdminService(repo)
+	svc := NewAdminAccountService(repo)
 
 	admin, err := svc.GetAdmin(ctx, 1)
 	if err != nil {
@@ -41,7 +41,7 @@ func TestAdminServiceUpdateAdmin(t *testing.T) {
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
-	svc := NewAdminService(repo)
+	svc := NewAdminAccountService(repo)
 
 	username := "root"
 	name := "超级管理员"
@@ -76,7 +76,7 @@ func TestAdminServiceUpdateAdminDuplicateUsername(t *testing.T) {
 	if err := repo.Upsert(ctx, testAdmin(2, "root")); err != nil {
 		t.Fatalf("seed admin 2 failed: %v", err)
 	}
-	svc := NewAdminService(repo)
+	svc := NewAdminAccountService(repo)
 
 	username := "root"
 	_, err := svc.UpdateAdmin(ctx, 1, model.UpdateAdminRequest{Username: &username})
@@ -99,7 +99,7 @@ func TestAdminServiceBatchDeleteIsIdempotent(t *testing.T) {
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
-	svc := NewAdminService(repo)
+	svc := NewAdminAccountService(repo)
 
 	req := model.BatchDeleteAdminRequest{IDs: []int64{1, 2}}
 	if err := svc.BatchDeleteAdmins(ctx, req); err != nil {
@@ -121,7 +121,7 @@ func TestAdminServiceToggleAdminStatus(t *testing.T) {
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
-	svc := NewAdminService(repo)
+	svc := NewAdminAccountService(repo)
 
 	updated, err := svc.ToggleAdminStatus(ctx, 1, model.ToggleAdminStatusRequest{Status: "disabled"})
 	if err != nil {

@@ -40,8 +40,8 @@ func SetupRouter() *gin.Engine {
 		panic(fmt.Errorf("初始化 MySQL 失败: %w", err))
 	}
 	adminRepo := newAdminRepositoryFromConfig(cfg, db)
-	adminService := service.NewAdminService(adminRepo)
-	adminController := controller.NewAdminController(adminService)
+	adminService := service.NewAdminAccountService(adminRepo)
+	adminAccountController := controller.NewAdminAccountController(adminService)
 
 	metaController := controller.NewMetaController()
 	appRepo := persistence.NewAppRepository()
@@ -64,18 +64,28 @@ func SetupRouter() *gin.Engine {
 
 	v1.GET("/meta", metaController.GetMeta)
 
-	app := v1.Group("/app")
+	commonGroup := v1.Group("/common")
+	appGroup := v1.Group("/app")
+	adminGroup := v1.Group("/admin")
+
 	{
-		app.POST("/getHelloInfo", appController.GetHelloInfo)
+		appGroup.POST("/getHelloInfo", appController.GetHelloInfo)
 	}
 
-	post := v1.Group("/post")
+	postGroup := commonGroup.Group("/post")
 	{
-		post.GET("", postController.GetPostList)
-		post.GET("/:id", postController.GetPostByID)
-		post.POST("", postController.CreatePost)
-		post.PUT("/:id", postController.UpdatePost)
-		post.DELETE("/:id", postController.DeletePost)
+		postGroup.GET("", postController.GetPostList)
+		postGroup.GET("/:id", postController.GetPostByID)
+		postGroup.POST("", postController.CreatePost)
+		postGroup.PUT("/:id", postController.UpdatePost)
+		postGroup.DELETE("/:id", postController.DeletePost)
+	}
+
+	fileGroup := commonGroup.Group("/file")
+	{
+		fileGroup.GET("/list", fileController.List)
+		fileGroup.GET("/listByDir", fileController.ListByDir)
+		fileGroup.POST("/upload", fileController.Upload)
 	}
 
 	video := v1.Group("/video")
@@ -83,22 +93,15 @@ func SetupRouter() *gin.Engine {
 		video.GET("", videoController.GetVideoList)
 	}
 
-	file := v1.Group("/file")
+	// adminGroup.POST("/auth/login", adminAuthController.Login)
+	// adminGroup.POST("/auth/refresh", adminAuthController.Refresh)
+	adminProtectedGroup := adminGroup.Group("")
+	adminProtectedGroup.Use(middleware.JWTAuthMiddleware())
 	{
-		file.GET("/list", fileController.List)
-		file.GET("/listByDir", fileController.ListByDir)
-		file.POST("/upload", fileController.Upload)
-	}
-
-	// 下面的api是需要登录的
-	v1.Use(middleware.JWTAuthMiddleware())
-
-	admin := v1.Group("/admin")
-	{
-		admin.GET("/:id", adminController.GetAdmin)
-		admin.PUT("/:id", adminController.UpdateAdmin)
-		admin.DELETE("/batch", adminController.BatchDeleteAdmins)
-		admin.PUT("/:id/status", adminController.ToggleAdminStatus)
+		adminProtectedGroup.GET("/users/:id", adminAccountController.GetAdmin)
+		adminProtectedGroup.PUT("/users/:id", adminAccountController.UpdateAdmin)
+		adminProtectedGroup.DELETE("/users/batch", adminAccountController.BatchDeleteAdmins)
+		adminProtectedGroup.PUT("/users/:id/status", adminAccountController.ToggleAdminStatus)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
@@ -109,12 +112,12 @@ func SetupRouter() *gin.Engine {
 	return r
 }
 
-func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.AdminRepository {
+func newAdminRepositoryFromConfig(cfg *config.Config, db *sql.DB) repository.AdminAccountRepository {
 	admin, err := buildAdminSeed(cfg)
 	if err != nil {
 		panic(fmt.Errorf("初始化管理员 seed 失败: %w", err))
 	}
-	repo := persistence.NewAdminRepository(db)
+	repo := persistence.NewAdminAccountRepository(db)
 	if admin == nil {
 		return repo
 	}
