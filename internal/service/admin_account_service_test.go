@@ -13,7 +13,7 @@ import (
 
 func TestAdminServiceGetAdminSkipsSoftDeleted(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestAdminServiceGetAdminSkipsSoftDeleted(t *testing.T) {
 
 func TestAdminServiceUpdateAdmin(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestAdminServiceUpdateAdmin(t *testing.T) {
 
 func TestAdminServiceUpdateAdminDuplicateUsername(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin 1 failed: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestAdminServiceUpdateAdminDuplicateUsername(t *testing.T) {
 
 func TestAdminServiceBatchDeleteIsIdempotent(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
@@ -117,7 +117,7 @@ func TestAdminServiceBatchDeleteIsIdempotent(t *testing.T) {
 
 func TestAdminServiceToggleAdminStatus(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestAdminServiceToggleAdminStatus(t *testing.T) {
 
 func TestAdminRepositoryFindByUsernameSkipsSoftDeleted(t *testing.T) {
 	ctx := context.Background()
-	repo := persistence.NewAdminRepository(nil)
+	repo := persistence.NewAdminAccountRepository(nil)
 	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
 		t.Fatalf("seed admin failed: %v", err)
 	}

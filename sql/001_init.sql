@@ -9,3 +9,33 @@ CREATE TABLE IF NOT EXISTS admins (
     deleted_at DATETIME NULL DEFAULT NULL,
     UNIQUE KEY uk_admins_username (username)
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(128) NOT NULL,
+    phone VARCHAR(32) NOT NULL DEFAULT '',
+    password_hash VARCHAR(255) NOT NULL,
+    nickname VARCHAR(128) NOT NULL,
+    avatar_url VARCHAR(512) NOT NULL DEFAULT '',
+    status VARCHAR(32) NOT NULL DEFAULT 'active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL DEFAULT NULL,
+    UNIQUE KEY uk_users_email (email)
+);
+
+-- `register / reset_password`
+CREATE TABLE IF NOT EXISTS validation_codes (
+    email VARCHAR(128) NOT NULL,
+    type VARCHAR(32) NOT NULL DEFAULT 'register',
+    code VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    last_sent_at DATETIME NULL DEFAULT NULL,
+    send_window_started_at DATETIME NULL DEFAULT NULL,
+    send_count_in_window INT NOT NULL DEFAULT 1,
+    used_at DATETIME NULL DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (email, type),
+    KEY idx_register_codes_expires_at (expires_at)
+);

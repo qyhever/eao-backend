@@ -39,3 +39,10 @@ third_party:
     base_url: "http://localhost:6301"
     secret: "test-secret"
     timeout_seconds: 10
+
+postal:
+  smtp_server: "" # SMTP服务器地址
+  smtp_port: ""  # SMTP端口(优先465)
+  from_email: "" # 发件邮箱
+  from_pass: ""  # 发件邮箱密码
+  from_name: ""  # 发件人显示名称

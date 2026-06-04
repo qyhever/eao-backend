@@ -20,6 +20,7 @@ type Config struct {
 	JWT           JWTConfig        `mapstructure:"jwt"`
 	Auth          AuthConfig       `mapstructure:"auth"`
 	ThirdParty    ThirdPartyConfig `mapstructure:"third_party"`
+	Postal        PostalConfig     `mapstructure:"postal"`
 }
 
 // ServerConfig 服务器配置
@@ -65,6 +66,15 @@ type AuthConfig struct {
 
 type ThirdPartyConfig struct {
 	FileAPI FileAPIConfig `mapstructure:"file_api"`
+}
+
+// Postal配置
+type PostalConfig struct {
+	SmtpServer string `mapstructure:"smtp_server"`
+	SmtpPort   string `mapstructure:"smtp_port"`
+	FromEmail  string `mapstructure:"from_email"`
+	FromPass   string `mapstructure:"from_pass"`
+	FromName   string `mapstructure:"from_name"`
 }
 
 type FileAPIConfig struct {
