@@ -42,6 +42,8 @@ func SetupRouter() *gin.Engine {
 	adminRepo := newAdminRepositoryFromConfig(cfg, db)
 	adminService := service.NewAdminAccountService(adminRepo)
 	adminAccountController := controller.NewAdminAccountController(adminService)
+	adminAuthService := service.NewAdminAuthService(adminRepo)
+	adminAuthController := controller.NewAdminAuthController(adminAuthService)
 
 	metaController := controller.NewMetaController()
 	appRepo := persistence.NewAppRepository()
@@ -93,7 +95,7 @@ func SetupRouter() *gin.Engine {
 		video.GET("", videoController.GetVideoList)
 	}
 
-	// adminGroup.POST("/auth/login", adminAuthController.Login)
+	adminGroup.POST("/auth/login", adminAuthController.AdminLogin)
 	// adminGroup.POST("/auth/refresh", adminAuthController.Refresh)
 	adminProtectedGroup := adminGroup.Group("")
 	adminProtectedGroup.Use(middleware.JWTAuthMiddleware())

@@ -3,6 +3,15 @@
 @host = {{hostname}}:{{port}}
 @token = replace-with-access-token
 
+### AdminLogin
+post http://{{host}}/api/admin/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
 ### GetPostList
 get http://{{host}}/api/post?pageNum=1&pageSize=10&keyword=测试 HTTP/1.1
 

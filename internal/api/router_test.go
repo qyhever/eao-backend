@@ -207,6 +207,33 @@ func TestSetupRouterAdminSuccessEnvelope(t *testing.T) {
 	}
 }
 
+func TestSetupRouterAdminLoginSuccess(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/auth/login", strings.NewReader(`{"username":"admin","password":"password"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code int `json:"code"`
+		Data struct {
+			AccessToken  string `json:"accessToken"`
+			RefreshToken string `json:"refreshToken"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1000 {
+		t.Fatalf("expected code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.AccessToken == "" || body.Data.RefreshToken == "" {
+		t.Fatalf("expected tokens, got %+v", body.Data)
+	}
+}
+
 func testRouterConfig(fileAPIBaseURL string) *config.Config {
 	if fileAPIBaseURL == "" {
 		fileAPIBaseURL = "http://localhost:6301"
@@ -237,7 +264,7 @@ func testRouterConfig(fileAPIBaseURL string) *config.Config {
 
 func testAccessToken(t *testing.T) string {
 	t.Helper()
-	token, _, err := jwtpkg.GenToken(1, false)
+	token, _, err := jwtpkg.GenToken(1)
 	if err != nil {
 		t.Fatalf("generate token failed: %v", err)
 	}

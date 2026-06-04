@@ -47,7 +47,7 @@ func parseDurationOrFallback(raw string, fallback time.Duration) time.Duration {
 }
 
 // GenToken 生成access token 和 refresh token
-func GenToken(userID uint64, rememberMe bool) (aToken, rToken string, err error) {
+func GenToken(userID uint64) (aToken, rToken string, err error) {
 	// 获取配置
 	cfg := config.GetConfig()
 
