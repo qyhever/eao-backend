@@ -5,6 +5,10 @@ type AdminLoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type AdminRefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
 type AdminLoginResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`

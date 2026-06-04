@@ -96,7 +96,7 @@ func SetupRouter() *gin.Engine {
 	}
 
 	adminGroup.POST("/auth/login", adminAuthController.AdminLogin)
-	// adminGroup.POST("/auth/refresh", adminAuthController.Refresh)
+	adminGroup.POST("/auth/refresh", adminAuthController.AdminRefreshToken)
 	adminProtectedGroup := adminGroup.Group("")
 	adminProtectedGroup.Use(middleware.JWTAuthMiddleware())
 	{

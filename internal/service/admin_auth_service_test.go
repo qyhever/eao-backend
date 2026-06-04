@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"eao/internal/config"
+	"eao/internal/domain"
 	"eao/internal/model"
 	jwtpkg "eao/internal/pkg/jwt"
 	"eao/internal/repository/persistence"
@@ -53,7 +54,7 @@ func TestAdminAuthServiceAdminLoginInvalidPassword(t *testing.T) {
 		Username: "admin",
 		Password: "bad-password",
 	})
-	if !errors.Is(err, ErrInvalidAdminCredentials) {
+	if !errors.Is(err, domain.ErrInvalidAdminCredentials) {
 		t.Fatalf("expected ErrInvalidAdminCredentials, got %v", err)
 	}
 }
@@ -73,8 +74,61 @@ func TestAdminAuthServiceAdminLoginDisabledAdmin(t *testing.T) {
 		Username: "admin",
 		Password: "password",
 	})
-	if !errors.Is(err, ErrInvalidAdminCredentials) {
+	if !errors.Is(err, domain.ErrInvalidAdminCredentials) {
 		t.Fatalf("expected ErrInvalidAdminCredentials, got %v", err)
+	}
+}
+
+func TestAdminAuthServiceAdminRefreshTokenSuccess(t *testing.T) {
+	config.GlobalConfig = testAuthConfig()
+	ctx := context.Background()
+	repo := persistence.NewAdminAccountRepository(nil)
+	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
+		t.Fatalf("seed admin failed: %v", err)
+	}
+	svc := NewAdminAuthService(repo)
+	_, refreshToken, err := jwtpkg.GenToken(1)
+	if err != nil {
+		t.Fatalf("generate token failed: %v", err)
+	}
+
+	result, err := svc.AdminRefreshToken(ctx, model.AdminRefreshTokenRequest{
+		RefreshToken: refreshToken,
+	})
+	if err != nil {
+		t.Fatalf("refresh token failed: %v", err)
+	}
+	if result.AccessToken == "" || result.RefreshToken == "" {
+		t.Fatalf("expected tokens, got %+v", result)
+	}
+
+	claims, err := jwtpkg.ParseToken(result.AccessToken)
+	if err != nil {
+		t.Fatalf("parse access token failed: %v", err)
+	}
+	if claims.UserID != 1 || !claims.IsAccessToken() {
+		t.Fatalf("unexpected access token claims: %+v", claims)
+	}
+}
+
+func TestAdminAuthServiceAdminRefreshTokenRejectsAccessToken(t *testing.T) {
+	config.GlobalConfig = testAuthConfig()
+	ctx := context.Background()
+	repo := persistence.NewAdminAccountRepository(nil)
+	if err := repo.Upsert(ctx, testAdmin(1, "admin")); err != nil {
+		t.Fatalf("seed admin failed: %v", err)
+	}
+	svc := NewAdminAuthService(repo)
+	accessToken, _, err := jwtpkg.GenToken(1)
+	if err != nil {
+		t.Fatalf("generate token failed: %v", err)
+	}
+
+	_, err = svc.AdminRefreshToken(ctx, model.AdminRefreshTokenRequest{
+		RefreshToken: accessToken,
+	})
+	if !errors.Is(err, domain.ErrInvalidRefreshToken) {
+		t.Fatalf("expected ErrInvalidRefreshToken, got %v", err)
 	}
 }
 

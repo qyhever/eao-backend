@@ -38,15 +38,35 @@ func (ac *AdminAuthController) AdminLogin(c *gin.Context) {
 	ResponseSuccess(c, result)
 }
 
+func (ac *AdminAuthController) AdminRefreshToken(c *gin.Context) {
+	var param model.AdminRefreshTokenRequest
+	if err := c.ShouldBindJSON(&param); err != nil {
+		ResponseFailedWithMsg(c, CodeInvalidParam, err.Error())
+		return
+	}
+
+	result, err := ac.authService.AdminRefreshToken(c.Request.Context(), param)
+	if err != nil {
+		ac.writeAdminAuthError(c, "admin refresh token failed", err)
+		return
+	}
+
+	ResponseSuccess(c, result)
+}
+
 func (ac *AdminAuthController) writeAdminAuthError(c *gin.Context, logMsg string, err error) {
 	switch {
 	case errors.Is(err, service.ErrInvalidAdminCredentials):
-		ResponseFailedWithMsg(c, CodeInvalidPassword, err.Error())
+		ResponseFailed(c, CodeInvalidPassword)
 	case errors.Is(err, service.ErrAdminUsernameRequired),
 		errors.Is(err, service.ErrAdminPasswordRequired):
 		ResponseFailedWithMsg(c, CodeInvalidParam, err.Error())
+	case errors.Is(err, service.ErrInvalidRefreshToken):
+		ResponseFailed(c, CodeInvalidToken)
+	case errors.Is(err, service.ErrUserNotFound):
+		ResponseFailed(c, CodeUserNotExist)
 	default:
 		zap.L().Error(logMsg, zap.Error(err))
-		ResponseFailedWithMsg(c, CodeServerBusy, err.Error())
+		ResponseFailed(c, CodeServerBusy)
 	}
 }

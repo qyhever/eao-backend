@@ -81,7 +81,7 @@ func TestSetupRouterProxiesFileList(t *testing.T) {
 	config.GlobalConfig = testRouterConfig(upstream.URL)
 
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodGet, "/api/file/list", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/common/file/list", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -97,7 +97,7 @@ func TestSetupRouterProxiesFileList(t *testing.T) {
 func TestSetupRouterFileListByDirMissingDirName(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodGet, "/api/file/listByDir", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/common/file/listByDir", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -127,7 +127,7 @@ func TestSetupRouterFileUploadMissingDirName(t *testing.T) {
 	}
 
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodPost, "/api/file/upload", &requestBody)
+	req := httptest.NewRequest(http.MethodPost, "/api/common/file/upload", &requestBody)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	resp := httptest.NewRecorder()
 
@@ -147,7 +147,7 @@ func TestSetupRouterFileUploadMissingDirName(t *testing.T) {
 func TestSetupRouterAdminRequiresToken(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodGet, "/api/admin/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/users/1", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -161,7 +161,7 @@ func TestSetupRouterAdminInvalidID(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 	token := testAccessToken(t)
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodGet, "/api/admin/bad", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/users/bad", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 	resp := httptest.NewRecorder()
 
@@ -182,7 +182,7 @@ func TestSetupRouterAdminSuccessEnvelope(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 	token := testAccessToken(t)
 	r := SetupRouter()
-	req := httptest.NewRequest(http.MethodGet, "/api/admin/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/users/1", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 	resp := httptest.NewRecorder()
 
@@ -231,6 +231,82 @@ func TestSetupRouterAdminLoginSuccess(t *testing.T) {
 	}
 	if body.Data.AccessToken == "" || body.Data.RefreshToken == "" {
 		t.Fatalf("expected tokens, got %+v", body.Data)
+	}
+}
+
+func TestSetupRouterAdminLoginInvalidPassword(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/auth/login", strings.NewReader(`{"username":"admin","password":"bad-password"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1004 {
+		t.Fatalf("expected code 1004, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Message != "用户名或密码错误" {
+		t.Fatalf("expected invalid password message, got %q", body.Message)
+	}
+}
+
+func TestSetupRouterAdminRefreshTokenSuccess(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	_, refreshToken, err := jwtpkg.GenToken(1)
+	if err != nil {
+		t.Fatalf("generate token failed: %v", err)
+	}
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/auth/refresh", strings.NewReader(`{"refreshToken":"`+refreshToken+`"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code int `json:"code"`
+		Data struct {
+			AccessToken  string `json:"accessToken"`
+			RefreshToken string `json:"refreshToken"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1000 {
+		t.Fatalf("expected code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.AccessToken == "" || body.Data.RefreshToken == "" {
+		t.Fatalf("expected tokens, got %+v", body.Data)
+	}
+}
+
+func TestSetupRouterAdminRefreshTokenRejectsAccessToken(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+	accessToken := testAccessToken(t)
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/auth/refresh", strings.NewReader(`{"refreshToken":"`+accessToken+`"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body struct {
+		Code int `json:"code"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	if body.Code != 1007 {
+		t.Fatalf("expected code 1007, got %d, body: %s", body.Code, resp.Body.String())
 	}
 }
 
