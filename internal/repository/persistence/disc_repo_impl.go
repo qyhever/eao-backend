@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"eao/internal/model"
 	"eao/internal/repository"
@@ -16,13 +15,49 @@ type DiscRepositoryImpl struct {
 }
 
 func NewDiscRepository() repository.DiscRepository {
-	_, currentFile, _, ok := runtime.Caller(0)
-	if !ok {
-		return &DiscRepositoryImpl{discFilePath: filepath.Join(".", "internal", "data", "disc.json")}
+	return &DiscRepositoryImpl{discFilePath: resolveDiscFilePath()}
+}
+
+func resolveDiscFilePath() string {
+	exePath, err := os.Executable()
+	if err == nil {
+		path := filepath.Join(filepath.Dir(exePath), "data", "disc.json")
+		if fileExists(path) {
+			return path
+		}
 	}
 
-	dataPath := filepath.Join(filepath.Dir(currentFile), "..", "..", "data", "disc.json")
-	return &DiscRepositoryImpl{discFilePath: dataPath}
+	wd, err := os.Getwd()
+	if err == nil {
+		for _, path := range discFilePathCandidates(wd) {
+			if fileExists(path) {
+				return path
+			}
+		}
+	}
+
+	return filepath.Join("data", "disc.json")
+}
+
+func discFilePathCandidates(startDir string) []string {
+	candidates := make([]string, 0)
+	for dir := startDir; ; dir = filepath.Dir(dir) {
+		candidates = append(candidates,
+			filepath.Join(dir, "internal", "data", "disc.json"),
+			filepath.Join(dir, "data", "disc.json"),
+		)
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+	}
+	return candidates
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 func (r *DiscRepositoryImpl) GetDiscList(query *model.DiscListQuery) ([]model.Disc, int, error) {

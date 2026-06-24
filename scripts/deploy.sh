@@ -38,6 +38,7 @@ rsync -avz --progress --partial ./eao qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./public qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./internal/config/app.yml qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./internal/config/prod.yml qyhever:/opt/apps/eao-backend
+rsync -avz --progress --partial ./internal/data qyhever:/opt/apps/eao-backend
 echo "✅ 上传完成！"
 
 echo "🔄 重启远程 eao 服务..."
