@@ -20,6 +20,13 @@ func (r *VideoRepositoryImpl) GetVideoList() ([]model.VideoConfig, error) {
 		{FileName: "a9d922e1.mp4", VideoName: "舔着舔着突然发现不对劲"},
 		{FileName: "vjsab8nx29p.mp4", VideoName: "今晚王者荣耀双排"},
 
+		{FileName: "20260613/c4f3cea3de5cb1.mp4", VideoName: "猴子的无语瞬间"},
+		{FileName: "20260613/c4f3cea3de5cb2.mp4", VideoName: "猴子吃魔鬼辣椒"},
+		{FileName: "20260613/c4f3cea3de5cb3.mp4", VideoName: "猴子欺负游客"},
+		{FileName: "20260613/c4f3cea3de5cb4.mp4", VideoName: "来吞"},
+		{FileName: "20260613/c4f3cea3de5cb5.mp4", VideoName: "薯片桶整蛊猴子"},
+		{FileName: "20260613/c4f3cea3de5cb6.mp4", VideoName: "动物们的无语瞬间"},
+
 		{FileName: "20260530/20260530-a07fff81c4571.mp4", VideoName: "人类跳高精华大赏"},
 		{FileName: "20260530/20260530-206cc334489d5.mp4", VideoName: "KTV小遛一首无地自容"},
 		{FileName: "20260530/20260530-7d648e5917ce88.mp4", VideoName: "喆学家同事在KTV，让所有人都无地自容"},
