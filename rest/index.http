@@ -18,6 +18,9 @@ get http://{{host}}/api/post?pageNum=1&pageSize=10&keyword=测试 HTTP/1.1
 ### GetPostList (without keyword)
 get http://{{host}}/api/post?pageNum=1&pageSize=3 HTTP/1.1
 
+### GetDiscList
+get http://{{host}}/api/disc?pageNum=1&pageSize=10 HTTP/1.1
+
 ### GetPostByID
 @postId = 45fbb08465322348262733406
 get http://{{host}}/api/post/{{postId}} HTTP/1.1

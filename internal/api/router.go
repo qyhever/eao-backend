@@ -54,6 +54,10 @@ func SetupRouter() *gin.Engine {
 	postService := service.NewPostService(postRepo)
 	postController := controller.NewPostController(postService)
 
+	discRepo := persistence.NewDiscRepository()
+	discService := service.NewDiscService(discRepo)
+	discController := controller.NewDiscController(discService)
+
 	videoRepo := persistence.NewVideoRepository()
 	videoService := service.NewVideoService(videoRepo)
 	videoController := controller.NewVideoController(videoService)
@@ -65,6 +69,7 @@ func SetupRouter() *gin.Engine {
 	v1 := r.Group("/api")
 
 	v1.GET("/meta", metaController.GetMeta)
+	v1.GET("/disc", discController.GetDiscList)
 
 	commonGroup := v1.Group("/common")
 	appGroup := v1.Group("/app")

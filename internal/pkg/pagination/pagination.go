@@ -7,7 +7,7 @@ const (
 )
 
 type Params struct {
-	Page     int
+	PageNum  int
 	PageSize int
 }
 
@@ -23,11 +23,11 @@ func Normalize(page int, pageSize int) Params {
 	}
 
 	return Params{
-		Page:     page,
+		PageNum:  page,
 		PageSize: pageSize,
 	}
 }
 
 func (p Params) Offset() int {
-	return (p.Page - 1) * p.PageSize
+	return (p.PageNum - 1) * p.PageSize
 }

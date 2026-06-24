@@ -24,6 +24,21 @@ type videoRecord struct {
 	VideoName string `json:"videoName"`
 }
 
+type discListEnvelope struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		List []struct {
+			ImgURL  string `json:"imgURL"`
+			Title   string `json:"title"`
+			PlayNum string `json:"playNum"`
+		} `json:"list"`
+		Total    int `json:"total"`
+		PageNum  int `json:"pageNum"`
+		PageSize int `json:"pageSize"`
+	} `json:"data"`
+}
+
 func TestSetupRouterReturnsVideoList(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 
@@ -46,8 +61,8 @@ func TestSetupRouterReturnsVideoList(t *testing.T) {
 		t.Fatalf("expected response code 1000, got %d", body.Code)
 	}
 
-	if len(body.Data) != 49 {
-		t.Fatalf("expected 49 videos, got %d", len(body.Data))
+	if len(body.Data) != 55 {
+		t.Fatalf("expected 55 videos, got %d", len(body.Data))
 	}
 
 	if !strings.HasPrefix(body.Data[0].FileName, "https://www.painorth.bbroot.com/videos/") {
@@ -60,6 +75,103 @@ func TestSetupRouterReturnsVideoList(t *testing.T) {
 
 	if body.Data[0].VideoName != "爸爸带着女儿买烧鸡" {
 		t.Fatalf("unexpected first videoName: %s", body.Data[0].VideoName)
+	}
+}
+
+func TestSetupRouterReturnsDefaultDiscList(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/disc", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, resp.Code)
+	}
+
+	var body discListEnvelope
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+
+	if body.Code != 1000 {
+		t.Fatalf("expected response code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.PageNum != 1 {
+		t.Fatalf("expected pageNum 1, got %d", body.Data.PageNum)
+	}
+	if body.Data.PageSize != 10 {
+		t.Fatalf("expected pageSize 10, got %d", body.Data.PageSize)
+	}
+	if len(body.Data.List) > 10 {
+		t.Fatalf("expected at most 10 discs, got %d", len(body.Data.List))
+	}
+	if body.Data.Total <= 10 {
+		t.Fatalf("expected total greater than 10, got %d", body.Data.Total)
+	}
+	if body.Data.List[0].Title != "泰式浪漫：你想要的甜蜜幻想" {
+		t.Fatalf("unexpected first title: %s", body.Data.List[0].Title)
+	}
+}
+
+func TestSetupRouterReturnsPagedDiscList(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/disc?pageNum=2&pageSize=5", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body discListEnvelope
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+
+	if body.Code != 1000 {
+		t.Fatalf("expected response code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.PageNum != 2 {
+		t.Fatalf("expected pageNum 2, got %d", body.Data.PageNum)
+	}
+	if body.Data.PageSize != 5 {
+		t.Fatalf("expected pageSize 5, got %d", body.Data.PageSize)
+	}
+	if len(body.Data.List) != 5 {
+		t.Fatalf("expected 5 discs, got %d", len(body.Data.List))
+	}
+	if body.Data.Total <= 5 {
+		t.Fatalf("expected total greater than 5, got %d", body.Data.Total)
+	}
+	if body.Data.List[0].Title != "【情歌对唱】幸福要握在手心里" {
+		t.Fatalf("unexpected first title on page 2: %s", body.Data.List[0].Title)
+	}
+}
+
+func TestSetupRouterDiscListNormalizesInvalidPagination(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/api/disc?pageNum=bad&pageSize=bad", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	var body discListEnvelope
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+
+	if body.Code != 1000 {
+		t.Fatalf("expected response code 1000, got %d, body: %s", body.Code, resp.Body.String())
+	}
+	if body.Data.PageNum != 1 {
+		t.Fatalf("expected pageNum 1, got %d", body.Data.PageNum)
+	}
+	if body.Data.PageSize != 10 {
+		t.Fatalf("expected pageSize 10, got %d", body.Data.PageSize)
 	}
 }
 
