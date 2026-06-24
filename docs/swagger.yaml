@@ -1,0 +1,788 @@
+basePath: /api
+definitions:
+  controller.MyCode:
+    enum:
+    - 1000
+    - 1001
+    - 1002
+    - 1003
+    - 1004
+    - 1005
+    - 1006
+    - 1007
+    - 1008
+    - 1009
+    - 1010
+    format: int64
+    type: integer
+    x-enum-comments:
+      CodeInvalidParam: 请求参数错误
+      CodeInvalidPassword: 用户名或密码错误
+      CodeInvalidToken: 无效的token
+      CodeNeedLogin: 需要登录
+      CodePermissionDenied: 权限不足
+      CodeResourceExists: 资源已存在
+      CodeResourceNotExist: 资源不存在
+      CodeServerBusy: 服务繁忙
+      CodeSuccess: 成功
+      CodeUserExist: 用户已存在
+      CodeUserNotExist: 用户不存在
+    x-enum-descriptions:
+    - 成功
+    - 请求参数错误
+    - 用户已存在
+    - 用户不存在
+    - 用户名或密码错误
+    - 服务繁忙
+    - 需要登录
+    - 无效的token
+    - 资源已存在
+    - 资源不存在
+    - 权限不足
+    x-enum-varnames:
+    - CodeSuccess
+    - CodeInvalidParam
+    - CodeUserExist
+    - CodeUserNotExist
+    - CodeInvalidPassword
+    - CodeServerBusy
+    - CodeNeedLogin
+    - CodeInvalidToken
+    - CodeResourceExists
+    - CodeResourceNotExist
+    - CodePermissionDenied
+  controller.SwaggerAdminBatchMutationResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.AdminBatchMutationResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerAdminLoginResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.AdminLoginResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerAdminMutationResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.AdminMutationResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerAdminProfileResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.AdminProfileResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerDiscListResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.DiscListResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerErrorResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1001
+      data: {}
+      message:
+        example: 请求参数错误
+        type: string
+    type: object
+  controller.SwaggerFileProxyResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        additionalProperties: true
+        type: object
+      message:
+        type: string
+    type: object
+  controller.SwaggerHelloInfoResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.GetHelloInfoResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerPostDetailResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.PostDetailResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerPostListResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.PostListResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerPostMutationResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        $ref: '#/definitions/model.PostMutationResponse'
+      message:
+        example: success
+        type: string
+    type: object
+  controller.SwaggerVideoListResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/controller.MyCode'
+        example: 1000
+      data:
+        items:
+          $ref: '#/definitions/model.VideoConfig'
+        type: array
+      message:
+        example: success
+        type: string
+    type: object
+  model.AdminBatchMutationResponse:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  model.AdminLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  model.AdminLoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  model.AdminMutationResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  model.AdminProfileResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        type: string
+      username:
+        type: string
+    type: object
+  model.AdminRefreshTokenRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  model.BatchDeleteAdminRequest:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - ids
+    type: object
+  model.CreatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.Disc:
+    properties:
+      imgURL:
+        type: string
+      playNum:
+        type: string
+      title:
+        type: string
+    type: object
+  model.DiscListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.Disc'
+        type: array
+      pageNum:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  model.GetHelloInfoRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  model.GetHelloInfoResponse:
+    properties:
+      name:
+        type: string
+    type: object
+  model.Post:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.PostDetailResponse:
+    properties:
+      post:
+        $ref: '#/definitions/model.Post'
+    type: object
+  model.PostListResponse:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.Post'
+        type: array
+      pageNum:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  model.PostMutationResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  model.ToggleAdminStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  model.UpdateAdminRequest:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UpdatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  model.VideoConfig:
+    properties:
+      fileName:
+        type: string
+      videoName:
+        type: string
+    type: object
+host: localhost:6304
+info:
+  contact: {}
+  description: eao-backend HTTP API documentation.
+  title: eao-backend API
+  version: "1.0"
+paths:
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用管理员用户名和密码换取 accessToken 与 refreshToken。
+      parameters:
+      - description: 登录参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 管理员登录
+      tags:
+      - admin-auth
+  /admin/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 使用 refreshToken 换取新的 accessToken 与 refreshToken。
+      parameters:
+      - description: 刷新参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.AdminRefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 刷新管理员 Token
+      tags:
+      - admin-auth
+  /admin/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据管理员 ID 获取管理员资料。Authorization 格式为 Bearer <accessToken>。
+      parameters:
+      - description: 管理员 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取管理员资料
+      tags:
+      - admin-users
+    put:
+      consumes:
+      - application/json
+      description: 根据管理员 ID 更新管理员账号、密码或名称。Authorization 格式为 Bearer <accessToken>。
+      parameters:
+      - description: 管理员 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新管理员
+      tags:
+      - admin-users
+  /admin/users/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 根据管理员 ID 切换管理员状态，status 支持 active 或 disabled。Authorization 格式为
+        Bearer <accessToken>。
+      parameters:
+      - description: 管理员 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ToggleAdminStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 切换管理员状态
+      tags:
+      - admin-users
+  /admin/users/batch:
+    delete:
+      consumes:
+      - application/json
+      description: 根据管理员 ID 列表批量软删除管理员。Authorization 格式为 Bearer <accessToken>。
+      parameters:
+      - description: 批量删除参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.BatchDeleteAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 批量删除管理员
+      tags:
+      - admin-users
+  /app/getHelloInfo:
+    post:
+      consumes:
+      - application/json
+      description: 根据传入 name 返回问候信息。
+      parameters:
+      - description: 请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.GetHelloInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取问候信息
+      tags:
+      - app
+  /common/file/list:
+    get:
+      consumes:
+      - application/json
+      description: 透传第三方文件服务的文件列表 JSON。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取文件列表
+      tags:
+      - file
+  /common/file/listByDir:
+    get:
+      consumes:
+      - application/json
+      description: 根据目录名称透传第三方文件服务的文件列表 JSON。
+      parameters:
+      - description: 目录名称
+        in: query
+        name: dirName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 按目录获取文件列表
+      tags:
+      - file
+  /common/file/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件到指定目录，并透传第三方文件服务返回的 JSON。
+      parameters:
+      - description: 目录名称
+        in: formData
+        name: dirName
+        required: true
+        type: string
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 上传文件
+      tags:
+      - file
+  /common/post:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取文章列表，可按关键字过滤。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取文章列表
+      tags:
+      - post
+    post:
+      consumes:
+      - application/json
+      description: 创建一篇文章并返回文章 ID。
+      parameters:
+      - description: 文章内容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 创建文章
+      tags:
+      - post
+  /common/post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据文章 ID 删除文章。
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 删除文章
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      description: 根据文章 ID 获取文章详情。
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取文章详情
+      tags:
+      - post
+    put:
+      consumes:
+      - application/json
+      description: 根据文章 ID 更新标题或内容，title 和 content 至少提供一个。
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 文章更新内容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 更新文章
+      tags:
+      - post
+  /disc:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取唱片列表，分页参数非法时会按默认分页归一化。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取唱片列表
+      tags:
+      - disc
+  /meta:
+    get:
+      consumes:
+      - application/json
+      description: 返回 public/meta.json 中的动态 JSON 内容；文件缺失时返回 deployTime=unknown。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取部署元信息
+      tags:
+      - meta
+  /video:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前视频配置列表。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.SwaggerErrorResponse'
+      summary: 获取视频配置列表
+      tags:
+      - video
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

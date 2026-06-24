@@ -21,6 +21,17 @@ func NewAdminAccountController(adminService *service.AdminAccountService) *Admin
 	}
 }
 
+// GetAdmin godoc
+// @Summary 获取管理员资料
+// @Description 根据管理员 ID 获取管理员资料。Authorization 格式为 Bearer <accessToken>。
+// @Tags admin-users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "管理员 ID"
+// @Success 200 {object} SwaggerAdminProfileResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/users/{id} [get]
 func (ac *AdminAccountController) GetAdmin(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {
@@ -36,6 +47,18 @@ func (ac *AdminAccountController) GetAdmin(c *gin.Context) {
 	ResponseSuccess(c, admin)
 }
 
+// UpdateAdmin godoc
+// @Summary 更新管理员
+// @Description 根据管理员 ID 更新管理员账号、密码或名称。Authorization 格式为 Bearer <accessToken>。
+// @Tags admin-users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "管理员 ID"
+// @Param request body model.UpdateAdminRequest true "更新参数"
+// @Success 200 {object} SwaggerAdminMutationResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/users/{id} [put]
 func (ac *AdminAccountController) UpdateAdmin(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {
@@ -57,6 +80,17 @@ func (ac *AdminAccountController) UpdateAdmin(c *gin.Context) {
 	ResponseSuccess(c, &model.AdminMutationResponse{ID: admin.ID})
 }
 
+// BatchDeleteAdmins godoc
+// @Summary 批量删除管理员
+// @Description 根据管理员 ID 列表批量软删除管理员。Authorization 格式为 Bearer <accessToken>。
+// @Tags admin-users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body model.BatchDeleteAdminRequest true "批量删除参数"
+// @Success 200 {object} SwaggerAdminBatchMutationResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/users/batch [delete]
 func (ac *AdminAccountController) BatchDeleteAdmins(c *gin.Context) {
 	var req model.BatchDeleteAdminRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,6 +106,18 @@ func (ac *AdminAccountController) BatchDeleteAdmins(c *gin.Context) {
 	ResponseSuccess(c, &model.AdminBatchMutationResponse{IDs: req.IDs})
 }
 
+// ToggleAdminStatus godoc
+// @Summary 切换管理员状态
+// @Description 根据管理员 ID 切换管理员状态，status 支持 active 或 disabled。Authorization 格式为 Bearer <accessToken>。
+// @Tags admin-users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "管理员 ID"
+// @Param request body model.ToggleAdminStatusRequest true "状态参数"
+// @Success 200 {object} SwaggerAdminMutationResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/users/{id}/status [put]
 func (ac *AdminAccountController) ToggleAdminStatus(c *gin.Context) {
 	id, ok := bindAdminID(c)
 	if !ok {

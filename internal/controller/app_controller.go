@@ -18,6 +18,16 @@ func NewAppController(appService *service.AppService) *AppController {
 	}
 }
 
+// GetHelloInfo godoc
+// @Summary 获取问候信息
+// @Description 根据传入 name 返回问候信息。
+// @Tags app
+// @Accept json
+// @Produce json
+// @Param request body model.GetHelloInfoRequest true "请求参数"
+// @Success 200 {object} SwaggerHelloInfoResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /app/getHelloInfo [post]
 func (app *AppController) GetHelloInfo(c *gin.Context) {
 	var req model.GetHelloInfoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -22,6 +22,16 @@ func NewAdminAuthController(
 	}
 }
 
+// AdminLogin godoc
+// @Summary 管理员登录
+// @Description 使用管理员用户名和密码换取 accessToken 与 refreshToken。
+// @Tags admin-auth
+// @Accept json
+// @Produce json
+// @Param request body model.AdminLoginRequest true "登录参数"
+// @Success 200 {object} SwaggerAdminLoginResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/auth/login [post]
 func (ac *AdminAuthController) AdminLogin(c *gin.Context) {
 	var param model.AdminLoginRequest
 	if err := c.ShouldBindJSON(&param); err != nil {
@@ -38,6 +48,16 @@ func (ac *AdminAuthController) AdminLogin(c *gin.Context) {
 	ResponseSuccess(c, result)
 }
 
+// AdminRefreshToken godoc
+// @Summary 刷新管理员 Token
+// @Description 使用 refreshToken 换取新的 accessToken 与 refreshToken。
+// @Tags admin-auth
+// @Accept json
+// @Produce json
+// @Param request body model.AdminRefreshTokenRequest true "刷新参数"
+// @Success 200 {object} SwaggerAdminLoginResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /admin/auth/refresh [post]
 func (ac *AdminAuthController) AdminRefreshToken(c *gin.Context) {
 	var param model.AdminRefreshTokenRequest
 	if err := c.ShouldBindJSON(&param); err != nil {

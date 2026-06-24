@@ -20,7 +20,11 @@ echo "📄 生成 public/meta.json..."
 CURRENT_TIME=$(date '+%Y-%m-%d %H:%M:%S')
 echo "{\"deployTime\": \"$CURRENT_TIME\"}" > public/meta.json
 
-# 3. 编译项目
+# 3. 生成 Swagger 文档
+echo "📚 生成 Swagger 文档..."
+go run github.com/swaggo/swag/cmd/swag@v1.16.6 init -g ./cmd/main.go -o ./docs
+
+# 4. 编译项目
 echo "🔨 正在编译..."
 # 设置环境变量进行交叉编译（如需在本机运行可去掉这些变量，这里保留原有逻辑）
 export CGO_ENABLED=0
@@ -36,6 +40,7 @@ echo "📅 部署时间: $CURRENT_TIME"
 echo "📤 开始上传文件到服务器..."
 rsync -avz --progress --partial ./eao qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./public qyhever:/opt/apps/eao-backend
+rsync -avz --delete --progress --partial ./docs qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./internal/config/app.yml qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./internal/config/prod.yml qyhever:/opt/apps/eao-backend
 rsync -avz --progress --partial ./internal/data qyhever:/opt/apps/eao-backend

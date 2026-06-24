@@ -20,6 +20,17 @@ func NewDiscController(discService *service.DiscService) *DiscController {
 	}
 }
 
+// GetDiscList godoc
+// @Summary 获取唱片列表
+// @Description 分页获取唱片列表，分页参数非法时会按默认分页归一化。
+// @Tags disc
+// @Accept json
+// @Produce json
+// @Param pageNum query int false "页码" default(1)
+// @Param pageSize query int false "每页数量" default(10)
+// @Success 200 {object} SwaggerDiscListResponse
+// @Failure 200 {object} SwaggerErrorResponse
+// @Router /disc [get]
 func (dc *DiscController) GetDiscList(c *gin.Context) {
 	req := model.DiscListQuery{
 		PageNum:  parseQueryInt(c, "pageNum"),

@@ -8,6 +8,14 @@ import (
 	"eao/internal/logger"
 )
 
+// @title eao-backend API
+// @version 1.0
+// @description eao-backend HTTP API documentation.
+// @host localhost:6304
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// 初始化配置
 	if err := config.Init(); err != nil {

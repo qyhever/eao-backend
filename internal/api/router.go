@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 
+	_ "eao/docs"
 	"eao/internal/config"
 	"eao/internal/controller"
 	"eao/internal/middleware"
@@ -19,6 +20,10 @@ import (
 	"eao/internal/service"
 
 	"github.com/gin-gonic/gin"
+	knife4goFiles "github.com/go-webtools/knife4go"
+	knife4goGin "github.com/go-webtools/knife4go/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRouter() *gin.Engine {
@@ -31,6 +36,8 @@ func SetupRouter() *gin.Engine {
 
 	// 静态文件服务
 	r.Static("/public", "./public")
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/k4/*any", knife4goGin.WrapHandler(knife4goFiles.Handler))
 
 	fmt.Printf("Go Version %v\n", runtime.Version())
 

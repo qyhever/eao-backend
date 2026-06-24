@@ -78,6 +78,42 @@ func TestSetupRouterReturnsVideoList(t *testing.T) {
 	}
 }
 
+func TestSetupRouterServesSwaggerUI(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/swagger/index.html", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d, body: %s", http.StatusOK, resp.Code, resp.Body.String())
+	}
+
+	if !strings.Contains(resp.Body.String(), "Swagger UI") {
+		t.Fatalf("expected Swagger UI response, got: %s", resp.Body.String())
+	}
+}
+
+func TestSetupRouterServesKnife4goUI(t *testing.T) {
+	config.GlobalConfig = testRouterConfig("")
+
+	r := SetupRouter()
+	req := httptest.NewRequest(http.MethodGet, "/k4/index.html", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d, body: %s", http.StatusOK, resp.Code, resp.Body.String())
+	}
+
+	if !strings.Contains(resp.Body.String(), "knife4j") {
+		t.Fatalf("expected Knife4j response, got: %s", resp.Body.String())
+	}
+}
+
 func TestSetupRouterReturnsDefaultDiscList(t *testing.T) {
 	config.GlobalConfig = testRouterConfig("")
 

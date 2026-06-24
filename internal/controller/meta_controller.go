@@ -14,6 +14,15 @@ func NewMetaController() *MetaController {
 	return &MetaController{}
 }
 
+// GetMeta godoc
+// @Summary 获取部署元信息
+// @Description 返回 public/meta.json 中的动态 JSON 内容；文件缺失时返回 deployTime=unknown。
+// @Tags meta
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Router /meta [get]
 func (mc *MetaController) GetMeta(c *gin.Context) {
 	metaData, err := os.ReadFile("./public/meta.json")
 	if err != nil {
