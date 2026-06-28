@@ -22,6 +22,7 @@ type responseEnvelope struct {
 type videoRecord struct {
 	FileName  string `json:"fileName"`
 	VideoName string `json:"videoName"`
+	Cover     string `json:"cover"`
 }
 
 type discListEnvelope struct {
@@ -61,8 +62,8 @@ func TestSetupRouterReturnsVideoList(t *testing.T) {
 		t.Fatalf("expected response code 1000, got %d", body.Code)
 	}
 
-	if len(body.Data) != 55 {
-		t.Fatalf("expected 55 videos, got %d", len(body.Data))
+	if len(body.Data) != 57 {
+		t.Fatalf("expected 57 videos, got %d", len(body.Data))
 	}
 
 	if !strings.HasPrefix(body.Data[0].FileName, "https://www.painorth.bbroot.com/videos/") {
@@ -75,6 +76,10 @@ func TestSetupRouterReturnsVideoList(t *testing.T) {
 
 	if body.Data[0].VideoName != "爸爸带着女儿买烧鸡" {
 		t.Fatalf("unexpected first videoName: %s", body.Data[0].VideoName)
+	}
+
+	if body.Data[0].Cover != "https://www.painorth.bbroot.com/videos/24u7qivyunz.png" {
+		t.Fatalf("unexpected first cover: %s", body.Data[0].Cover)
 	}
 }
 

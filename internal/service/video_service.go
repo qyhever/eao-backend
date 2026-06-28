@@ -28,11 +28,16 @@ func (s *VideoService) GetVideoList() ([]model.VideoConfig, error) {
 
 	baseURL := strings.TrimRight(cfg.PublicBaseURL, "/")
 	for i := range list {
-		if strings.HasPrefix(list[i].FileName, "http://") || strings.HasPrefix(list[i].FileName, "https://") {
-			continue
-		}
-		list[i].FileName = baseURL + "/" + strings.TrimLeft(list[i].FileName, "/")
+		list[i].FileName = withPublicBaseURL(baseURL, list[i].FileName)
+		list[i].Cover = withPublicBaseURL(baseURL, list[i].Cover)
 	}
 
 	return list, nil
+}
+
+func withPublicBaseURL(baseURL, name string) string {
+	if name == "" || strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
+		return name
+	}
+	return baseURL + "/" + strings.TrimLeft(name, "/")
 }

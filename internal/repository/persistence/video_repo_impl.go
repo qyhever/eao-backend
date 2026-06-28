@@ -3,6 +3,8 @@ package persistence
 import (
 	"eao/internal/model"
 	"eao/internal/repository"
+	"path"
+	"strings"
 )
 
 type VideoRepositoryImpl struct{}
@@ -12,8 +14,10 @@ func NewVideoRepository() repository.VideoRepository {
 }
 
 func (r *VideoRepositoryImpl) GetVideoList() ([]model.VideoConfig, error) {
-	return []model.VideoConfig{
+	list := []model.VideoConfig{
 		{FileName: "24u7qivyunz.mp4", VideoName: "爸爸带着女儿买烧鸡"},
+		{FileName: "20260628/char_clip4.mp4", VideoName: "单韵母"},
+		{FileName: "20260628/char.mp4", VideoName: "一年级拼音"},
 		{FileName: "a9d922da.mp4", VideoName: "太有才了这哥们"},
 		{FileName: "a9d922dc.mp4", VideoName: "不要学电影里炒菜，都是假的"},
 		{FileName: "last-night.mp4", VideoName: "英雄联盟CG-最后的曙光"},
@@ -71,5 +75,19 @@ func (r *VideoRepositoryImpl) GetVideoList() ([]model.VideoConfig, error) {
 		{FileName: "ios/IMG_5398.mp4", VideoName: "ios/IMG_5398.mp4"},
 		{FileName: "ios/IMG_5399.mp4", VideoName: "ios/IMG_5399.mp4"},
 		{FileName: "ios/IMG_5400.mp4", VideoName: "ios/IMG_5400.mp4"},
-	}, nil
+	}
+
+	for i := range list {
+		list[i].Cover = videoCoverName(list[i].FileName)
+	}
+
+	return list, nil
+}
+
+func videoCoverName(fileName string) string {
+	ext := path.Ext(fileName)
+	if ext == "" {
+		return fileName + ".png"
+	}
+	return strings.TrimSuffix(fileName, ext) + ".png"
 }

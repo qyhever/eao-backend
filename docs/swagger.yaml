@@ -354,6 +354,8 @@ definitions:
     type: object
   model.VideoConfig:
     properties:
+      cover:
+        type: string
       fileName:
         type: string
       videoName:

@@ -1192,6 +1192,9 @@ const docTemplate = `{
         "model.VideoConfig": {
             "type": "object",
             "properties": {
+                "cover": {
+                    "type": "string"
+                },
                 "fileName": {
                     "type": "string"
                 },
